@@ -12,7 +12,7 @@
     @section('content')
         <div class="container">
             @if ($weather)
-                <h2>Météo à {{ $weather['name'] }}</h2>
+                <h2>Météo à {{ $cityName }}</h2>
                 <p>Température : {{ $weather['main']['temp'] }} °C</p>
                 <p>Description : {{ $weather['weather'][0]['description'] }}</p>
 

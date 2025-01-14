@@ -134,6 +134,36 @@ class WeatherController extends Controller
         return redirect()->back()->with('status', 'Ville enregistrée avec succès!');
     }
 
+    public function showFavCityWeather()
+    {
+        // check if user has favorite city
+        $favCity = auth()->user()->favCity;
+
+        if (!$favCity) {
+            return redirect()->route('weather.form')->with('status', 'Aucune ville favorite définie.');
+        }
+
+        $coords = $this->getCoordinates($favCity->city_name);
+
+        if ($coords) {
+            // get weather and forecast data for the favorite city
+            list($weatherData, $forecastData) = $this->getWeatherData($coords['lat'], $coords['lon']);
+
+            if ($weatherData && $forecastData) {
+                // group forecast per day
+                $dailyForecasts = $this->groupForecastByDay($forecastData['list']);
+
+                return view('weather.show', [
+                    'cityName' => $favCity->city_name,
+                    'weather' => $weatherData,
+                    'forecast' => $dailyForecasts,
+                ]);
+            }
+        }
+
+        return redirect()->back()->withErrors(['message' => 'Impossible de récupérer les coordonnées de la ville favorite.']);
+    }
+
     public function addCityToList(Request $request)
     {
         $request->validate([
@@ -148,6 +178,20 @@ class WeatherController extends Controller
         ]);
 
         return redirect()->back()->with('status', 'Ville ajoutée avec succès à votre liste !');
+    }
+
+    public function deleteCity($cityId)
+    {
+        // get city from id
+        $city = auth()->user()->listCities()->find($cityId);
+
+        if (!$city) {
+            return redirect()->back()->withErrors(['message' => 'Ville introuvable ou non autorisée.']);
+        }
+
+        $city->delete();
+
+        return redirect()->route('dashboard')->with('status', 'La ville a été supprimée de votre liste.');
     }
 
     public function showCityWeather($cityId)
@@ -170,6 +214,7 @@ class WeatherController extends Controller
                 $dailyForecasts = $this->groupForecastByDay($forecastData['list']);
 
                 return view('weather.show', [
+                    'cityName' => $city->city_name,
                     'weather' => $weatherData,
                     'forecast' => $dailyForecasts,
                 ]);
@@ -178,49 +223,6 @@ class WeatherController extends Controller
 
         return redirect()->back()->withErrors(['message' => 'Impossible de récupérer les coordonnées de la ville.']);
     }   
-
-    public function showFavCityWeather()
-    {
-        // check if user has favorite city
-        $favCity = auth()->user()->favCity;
-
-        if (!$favCity) {
-            return redirect()->route('weather.form')->with('status', 'Aucune ville favorite définie.');
-        }
-
-        $coords = $this->getCoordinates($favCity->city_name);
-
-        if ($coords) {
-            // get weather and forecast data for the favorite city
-            list($weatherData, $forecastData) = $this->getWeatherData($coords['lat'], $coords['lon']);
-
-            if ($weatherData && $forecastData) {
-                // group forecast per day
-                $dailyForecasts = $this->groupForecastByDay($forecastData['list']);
-
-                return view('weather.show', [
-                    'weather' => $weatherData,
-                    'forecast' => $dailyForecasts,
-                ]);
-            }
-        }
-
-        return redirect()->back()->withErrors(['message' => 'Impossible de récupérer les coordonnées de la ville favorite.']);
-    }
-
-    public function deleteCity($cityId)
-    {
-        // get city from id
-        $city = auth()->user()->listCities()->find($cityId);
-
-        if (!$city) {
-            return redirect()->back()->withErrors(['message' => 'Ville introuvable ou non autorisée.']);
-        }
-
-        $city->delete();
-
-        return redirect()->route('dashboard')->with('status', 'La ville a été supprimée de votre liste.');
-    }
 
     public function csvExport(Request $request)
     {
@@ -250,7 +252,7 @@ class WeatherController extends Controller
         // response http with csv file
         return Response::make($csvData, 200, [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"previsions\"", // to download the file
+            'Content-Disposition' => "attachment; filename=\"previsions.csv\"", // to download the file
         ]);
     }
 
