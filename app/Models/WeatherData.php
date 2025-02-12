@@ -10,7 +10,7 @@ class WeatherData extends Model
     use HasFactory;
 
     // Define columns that could be completed with data
-    protected $fillable = ['city', 'temperature', 'description', 'forecast'];
+    protected $fillable = ['city', 'temperature', 'description', 'forecast', 'latitude', 'longitude'];
 
     // Cast columns to data types
     protected $casts = [

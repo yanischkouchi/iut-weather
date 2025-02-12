@@ -26,6 +26,8 @@
             <h2>Météo à {{ $weather->city }}</h2>
             <p>Température : {{ $weather->temperature }} °C</p>
             <p>Description : {{ $weather->description }}</p>
+            <p>Latitude : {{ $weather->latitude }}</p>
+            <p>Longitude : {{ $weather->longitude }}</p>
             <form action="{{ route('weather.save_city') }}" method="POST" style="display: inline;">
                 @csrf
                 <input type="hidden" name="city_name" value="{{ $weather->city }}">

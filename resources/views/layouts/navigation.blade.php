@@ -12,22 +12,21 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <!-- Dashboard button -->
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <!-- Weather button -->
                     <x-nav-link :href="route('weather.form')" :active="request()->routeIs('weather.form')">
                         {{ __('Weather') }}
                     </x-nav-link>
+                    <!-- Fav city button -->
                     @if (auth()->check() && auth()->user()->favCity)
                         <x-nav-link :href="route('weather.fav_city')" :active="request()->routeIs('weather.fav_city')">
                             {{ auth()->user()->favCity->city_name }} ⭐
                         </x-nav-link>
                     @endif
-                    <!-- @foreach (auth()->user()->listCities as $city)
-                        <x-nav-link :href="route('weather.city', $city->id)" :active="request()->routeIs('weather.city')">
-                            {{ $city->city_name }}
-                        </x-nav-link>
-                    @endforeach -->
+                    <!-- Cities from the list -->
                     @foreach (auth()->user()->listCities as $city)
                         <div style="display: flex;">
                             <x-nav-link :href="route('weather.city', ['cityId' => $city->id])" 
@@ -41,7 +40,6 @@
                             </form>
                         </div>
                     @endforeach
-
                 </div>
             </div>
 

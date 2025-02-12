@@ -30,6 +30,8 @@ class WeatherController extends Controller
                             ['city' => $city],
                             [
                                 'city' => $city,
+                                'latitude' => $coords['lat'],
+                                'longitude' => $coords['lon'],
                                 'temperature' => $weatherData['main']['temp'] ?? 'Données non disponibles',
                                 'description' => $weatherData['weather'][0]['description'] ?? 'Données non disponibles',
                                 'forecast' => json_encode($forecastData['list'] ?? []),
@@ -41,7 +43,7 @@ class WeatherController extends Controller
                     }
                 } else {
                     return redirect()->back()->withErrors([
-                        'message' => 'Impossible de récupérer les coordonnées pour la ville.'
+                        'message' => 'Impossible de récupérer les coordonnées de cette ville.'
                     ]);
                 }
             } else {
@@ -227,7 +229,6 @@ class WeatherController extends Controller
     public function csvExport(Request $request)
     {
         $forecasts = $request->input('forecasts');
-        // $cityName = $request->input('city_name');
 
         if (!$forecasts) {
             return redirect()->back()->withErrors(['error' => 'Aucune donnée à exporter.']);
@@ -246,8 +247,6 @@ class WeatherController extends Controller
                 $csvData .= "$date,$time,$temperature,$description\n";
             }
         }
-
-        // $fileName = "previsions_{$cityName}.csv";
 
         // response http with csv file
         return Response::make($csvData, 200, [
